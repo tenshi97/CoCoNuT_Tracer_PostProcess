@@ -37,7 +37,7 @@ class TracerReader:
         print("base dir:", base)
         files = [
             f for f in base.iterdir()
-            if f.is_file() and f.name.startswith(modelname)
+            if f.is_file() and f.name.startswith(modelname) and f.suffix.startswith(".o")
         ]
         files = sorted(files, key=lambda f: f.name)
         self.files = [str(f.as_posix()) for f in files]
@@ -205,13 +205,15 @@ class TracerReader:
         plt.xlabel("Radius/cm")
         plt.ylabel("Theta")
         plt.tight_layout()
-        plt.savefig(f"{self.modelname}_vex.png",dpi=640,bbox_inches='tight')
+        plt.savefig(f"vex_contour_{self.modelname}_vex.png",dpi=640,bbox_inches='tight')
         plt.show()
         plt.close()
 
     def contour_any(self,name):
-        par = self.get_element(name)
-        par = self.get_element(name)
+        if(name!="ebind"):
+            par = self.get_element(name)
+        else:
+            par = self.get_binding_energy()
         xzn = self.get_element("xzn")
         yzn = self.get_element("yzn")
         contour = plt.contourf(xzn, yzn, par[:, :, 0].transpose(), levels=20, cmap='viridis',norm=LogNorm())
@@ -225,7 +227,7 @@ class TracerReader:
         plt.xlabel("Radius/cm")
         plt.ylabel("Theta")
         plt.tight_layout()
-        plt.savefig(f"{self.modelname}_{name}.png",dpi=640,bbox_inches='tight')
+        plt.savefig(f"{name}_contour_{self.modelname}.png",dpi=640,bbox_inches='tight')
         plt.close()
 
     def get_gridmass(self,x,y):
@@ -284,9 +286,9 @@ class TracerReader:
         print(M_ejected_f/1.989e33)
         np.savetxt(f"{self.modelname}_mnu_cor.txt",mnu_cor, fmt='%.8e', delimiter=' ')
         f = open(f"{self.modelname}_ejectamass.txt","w")
-        f.write(f"Innermost Ejecta:({M_ejected/1.989e33:.8f} Solar Mass\n")
+        f.write(f"Innermost Ejecta:{M_ejected/1.989e33:.8f} Solar Mass\n")
         f.write(f"Correct Region Mass:{M_ejected_f/1.989e33:.8f} Solar Mass\n")
-        f.write(f"Total Grid Mass:{M_ejected_f/1.989e33:.8f} Solar Mass\n")
+        f.write(f"Total Grid Mass:{M_all/1.989e33:.8f} Solar Mass\n")
         f.close()
     def count_ejecta(self):
         self.set_index(self.n)
@@ -315,7 +317,7 @@ class TracerReader:
         plt.xlabel("Radius/cm")
         plt.ylabel("Theta")
         plt.tight_layout()
-        plt.savefig(f"{self.modelname}_entropy.png",dpi=640,bbox_inches='tight')
+        plt.savefig(f"entropy_contour_{self.modelname}.png",dpi=640,bbox_inches='tight')
         plt.close()
 
     def get_binding_energy(self):
